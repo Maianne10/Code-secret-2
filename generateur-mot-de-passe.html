@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Générateur de mot de passe</title>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: #f4f6f9;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    .pg-wrap {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 2.5rem 2rem;
+      max-width: 580px;
+      width: 100%;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+
+    .pg-title {
+      font-family: 'Pacifico', cursive;
+      font-size: 26px;
+      font-weight: 400;
+      color: #1a1a2e;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .pg-title i { font-size: 24px; color: #378ADD; }
+
+    /* Zone mot de passe */
+    .pwd-display {
+      background: #B5D4F4;
+      border: 1px solid #85B7EB;
+      border-radius: 12px;
+      padding: 1.25rem 1rem;
+      margin-bottom: 0.75rem;
+      min-height: 64px;
+      display: flex;
+      align-items: center;
+    }
+    .pwd-text {
+      flex: 1;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      font-weight: 500;
+      color: #042C53;
+      letter-spacing: 0.08em;
+      word-break: break-all;
+    }
+
+    /* Boutons */
+    .btn-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 1.25rem;
+    }
+    .action-btn {
+      padding: 12px 0;
+      border-radius: 8px;
+      border: 1px solid #d0d5dd;
+      background: #ffffff;
+      color: #1a1a2e;
+      font-family: 'Pacifico', cursive;
+      font-size: 14px;
+      font-weight: 400;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: all 0.15s;
+    }
+    .action-btn:hover { background: #f4f6f9; border-color: #aab2bd; }
+    .action-btn:active { transform: scale(0.98); }
+    .action-btn i { font-size: 17px; }
+    .action-btn.copy-success {
+      color: #0d7a5f;
+      border-color: #0d7a5f;
+      background: #e1f5ee;
+    }
+
+    /* Barre de force */
+    .strength-wrap { margin-bottom: 1.25rem; }
+    .strength-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .strength-label {
+      font-size: 12px;
+      color: #6b7280;
+      letter-spacing: 0.05em;
+    }
+    .strength-badge {
+      font-family: 'Pacifico', cursive;
+      font-size: 12px;
+      padding: 2px 12px;
+      border-radius: 99px;
+      border: 1px solid transparent;
+    }
+    .strength-bar-bg {
+      height: 6px;
+      background: #e5e7eb;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .strength-bar {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.4s cubic-bezier(.4,0,.2,1), background 0.4s;
+    }
+    .warn-list { margin: 8px 0 0; padding: 0; list-style: none; }
+    .warn-item {
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: #a32d2d;
+      margin-top: 4px;
+    }
+    .warn-item i { font-size: 13px; }
+
+    /* Séparateur */
+    .divider { height: 1px; background: #e5e7eb; margin: 1.25rem 0; }
+
+    /* Labels sections */
+    .section-label {
+      font-family: 'Pacifico', cursive;
+      font-size: 13px;
+      color: #6b7280;
+      margin-bottom: 10px;
+    }
+
+    /* Longueur */
+    .len-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 1.25rem;
+    }
+    .len-num {
+      font-family: 'Pacifico', cursive;
+      font-size: 28px;
+      color: #1a1a2e;
+      min-width: 38px;
+      text-align: center;
+      line-height: 1;
+    }
+    input[type="range"] {
+      flex: 1;
+      height: 4px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: #d0d5dd;
+      border-radius: 99px;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      background: #378ADD;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid #fff;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      background: #378ADD;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid #fff;
+    }
+
+    /* Options */
+    .opts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 0;
+    }
+    .opt-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 10px 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: border-color 0.15s, background 0.15s;
+      user-select: none;
+    }
+    .opt-card:hover { border-color: #aab2bd; }
+    .opt-card.active {
+      border-color: #378ADD;
+      background: #E6F1FB;
+    }
+    .opt-check {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      border: 1.5px solid #d0d5dd;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .opt-card.active .opt-check {
+      background: #378ADD;
+      border-color: #378ADD;
+    }
+    .opt-check i { font-size: 11px; color: white; display: none; }
+    .opt-card.active .opt-check i { display: block; }
+    .opt-name {
+      font-family: 'Pacifico', cursive;
+      font-size: 12px;
+      color: #1a1a2e;
+    }
+    .opt-example {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: #6b7280;
+      margin-top: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="pg-wrap">
+    <div class="pg-title">
+      <i class="ti ti-lock"></i>
+      Mot de passe
+    </div>
+
+    <div class="pwd-display">
+      <div class="pwd-text" id="pwd-out">Cliquez sur "Générer"</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="action-btn" id="gen-btn">
+        <i class="ti ti-shield-check"></i>
+        Générer
+      </button>
+      <button class="action-btn" id="copy-btn">
+        <i class="ti ti-copy"></i>
+        Copier
+      </button>
+    </div>
+
+    <div class="strength-wrap">
+      <div class="strength-header">
+        <span class="strength-label">Force du mot de passe</span>
+        <span class="strength-badge" id="strength-badge">—</span>
+      </div>
+      <div class="strength-bar-bg">
+        <div class="strength-bar" id="strength-bar" style="width:0%;background:#e5e7eb;"></div>
+      </div>
+      <ul class="warn-list" id="warn-list"></ul>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section-label">Longueur — <span id="len-label">12</span> caractères</div>
+    <div class="len-row">
+      <span class="len-num" id="len-num">12</span>
+      <input type="range" id="len-range" min="8" max="20" value="12" step="1">
+    </div>
+
+    <div class="section-label">Types de caractères</div>
+    <div class="opts-grid">
+      <div class="opt-card active" data-key="lower">
+        <div class="opt-check"><i class="ti ti-check"></i></div>
+        <div class="opt-info">
+          <div class="opt-name">Minuscules</div>
+          <div class="opt-example">a b c … z</div>
+        </div>
+      </div>
+      <div class="opt-card active" data-key="upper">
+        <div class="opt-check"><i class="ti ti-check"></i></div>
+        <div class="opt-info">
+          <div class="opt-name">Majuscules</div>
+          <div class="opt-example">A B C … Z</div>
+        </div>
+      </div>
+      <div class="opt-card active" data-key="digits">
+        <div class="opt-check"><i class="ti ti-check"></i></div>
+        <div class="opt-info">
+          <div class="opt-name">Chiffres</div>
+          <div class="opt-example">0 1 2 … 9</div>
+        </div>
+      </div>
+      <div class="opt-card" data-key="symbols">
+        <div class="opt-check"><i class="ti ti-check"></i></div>
+        <div class="opt-info">
+          <div class="opt-name">Symboles</div>
+          <div class="opt-example">! @ # $ % &amp; *</div>
+        </div>
+      </div>
+      <div class="opt-card" data-key="punct">
+        <div class="opt-check"><i class="ti ti-check"></i></div>
+        <div class="opt-info">
+          <div class="opt-name">Ponctuation</div>
+          <div class="opt-example">. , ; : ? ' "</div>
+        </div>
+      </div>
+      <div class="opt-card" data-key="similar">
+        <div class="opt-check"><i class="ti ti-check"></i></div>
+        <div class="opt-info">
+          <div class="opt-name">Exclure similaires</div>
+          <div class="opt-example">évite O 0 l 1 I</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const CHARSETS = {
+      lower:   'abcdefghijklmnopqrstuvwxyz',
+      upper:   'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+      digits:  '0123456789',
+      symbols: '!@#$%^&*+-=_~|<>[]{}',
+      punct:   '.,;:?\'"-()'
+    };
+    const SIMILAR = /[O0l1I]/g;
+    const active = { lower: true, upper: true, digits: true, symbols: false, punct: false, similar: false };
+    let length = 12;
+    let currentPwd = '';
+
+    function buildCharset() {
+      let s = '';
+      if (active.lower)   s += CHARSETS.lower;
+      if (active.upper)   s += CHARSETS.upper;
+      if (active.digits)  s += CHARSETS.digits;
+      if (active.symbols) s += CHARSETS.symbols;
+      if (active.punct)   s += CHARSETS.punct;
+      if (active.similar) s = s.replace(SIMILAR, '');
+      return s;
+    }
+
+    function genPassword() {
+      const charset = buildCharset();
+      if (!charset) return '';
+      const arr = new Uint32Array(length);
+      crypto.getRandomValues(arr);
+      let pwd = '';
+      for (let i = 0; i < length; i++) pwd += charset[arr[i] % charset.length];
+      return pwd;
+    }
+
+    function calcEntropy(pwd) {
+      const charset = buildCharset();
+      if (!charset || !pwd) return 0;
+      return Math.floor(pwd.length * Math.log2(charset.length));
+    }
+
+    function analyzeStrength(pwd) {
+      if (!pwd) return { label: '—', color: '#e5e7eb', width: 0, warns: [], badgeBg: '', badgeColor: '#6b7280' };
+      const warns = [];
+      let score = 0;
+      const entropy = calcEntropy(pwd);
+      if (entropy >= 80) score += 4;
+      else if (entropy >= 60) score += 3;
+      else if (entropy >= 40) score += 2;
+      else score += 1;
+      const types = [/[a-z]/, /[A-Z]/, /[0-9]/, /[^a-zA-Z0-9]/];
+      score += types.filter(r => r.test(pwd)).length;
+      if (/(.)\1{2,}/.test(pwd)) { score -= 2; warns.push('Répétitions de caractères détectées'); }
+      if (/^[a-zA-Z]+$/.test(pwd)) warns.push('Aucun chiffre ou symbole');
+      if (/^[0-9]+$/.test(pwd)) warns.push('Uniquement des chiffres');
+      if (pwd.length < 10) warns.push('Longueur insuffisante (< 10 caractères)');
+      const pct = Math.min(100, Math.round((score / 8) * 100));
+      let label, color, badgeBg, badgeColor;
+      if (pct >= 80) {
+        label = 'Très fort'; color = '#0d7a5f'; badgeBg = '#e1f5ee'; badgeColor = '#0d7a5f';
+      } else if (pct >= 60) {
+        label = 'Fort'; color = '#3B6D11'; badgeBg = '#eaf3de'; badgeColor = '#3B6D11';
+      } else if (pct >= 40) {
+        label = 'Moyen'; color = '#c47a0a'; badgeBg = '#faeeda'; badgeColor = '#c47a0a';
+      } else {
+        label = 'Faible'; color = '#a32d2d'; badgeBg = '#fcebeb'; badgeColor = '#a32d2d';
+      }
+      return { label, color, width: pct, warns, badgeBg, badgeColor };
+    }
+
+    function render(pwd) {
+      document.getElementById('pwd-out').textContent = pwd || 'Cliquez sur "Générer"';
+      const s = analyzeStrength(pwd);
+      const bar = document.getElementById('strength-bar');
+      bar.style.width = s.width + '%';
+      bar.style.background = s.color;
+      const badge = document.getElementById('strength-badge');
+      badge.textContent = s.label;
+      badge.style.background = s.badgeBg;
+      badge.style.color = s.badgeColor;
+      badge.style.borderColor = s.color;
+      const warnList = document.getElementById('warn-list');
+      warnList.innerHTML = '';
+      s.warns.forEach(w => {
+        const li = document.createElement('li');
+        li.className = 'warn-item';
+        li.innerHTML = `<i class="ti ti-alert-circle"></i>${w}`;
+        warnList.appendChild(li);
+      });
+    }
+
+    document.getElementById('gen-btn').addEventListener('click', () => {
+      currentPwd = genPassword();
+      render(currentPwd);
+    });
+
+    document.getElementById('copy-btn').addEventListener('click', function() {
+      if (!currentPwd) return;
+      navigator.clipboard.writeText(currentPwd).then(() => {
+        this.classList.add('copy-success');
+        this.innerHTML = '<i class="ti ti-check"></i> Copié !';
+        setTimeout(() => {
+          this.classList.remove('copy-success');
+          this.innerHTML = '<i class="ti ti-copy"></i> Copier';
+        }, 2000);
+      });
+    });
+
+    document.getElementById('len-range').addEventListener('input', function() {
+      length = parseInt(this.value);
+      document.getElementById('len-num').textContent = length;
+      document.getElementById('len-label').textContent = length;
+      if (currentPwd) { currentPwd = genPassword(); render(currentPwd); }
+    });
+
+    document.querySelectorAll('.opt-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const k = card.dataset.key;
+        active[k] = !active[k];
+        card.classList.toggle('active', active[k]);
+        const keys = ['lower','upper','digits','symbols','punct'];
+        if (!keys.some(key => active[key])) { active[k] = true; card.classList.add('active'); }
+        if (currentPwd) { currentPwd = genPassword(); render(currentPwd); }
+      });
+    });
+  </script>
+</body>
+</html>
